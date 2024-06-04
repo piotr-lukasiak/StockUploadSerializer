@@ -1,1 +1,1 @@
-"## StockUploadSerializer" 
+## StockUploadSerializer
