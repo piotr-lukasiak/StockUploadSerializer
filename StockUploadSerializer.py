@@ -1,13 +1,11 @@
-from pandas import DataFrame, read_excel, merge, isna
+from polars import DataFrame, read_excel, from_dicts
 
-rawData = read_excel("MAPPING_TEMPLATE.xlsx",sheet_name='LX02_DATA',usecols=['OWNER','OWNER_ROLE','ENTITELED','ENTITLED_ROLE',
+rawData = read_excel("MAPPING_TEMPLATE.xlsx",sheet_name='LX02_DATA',engine = 'openpyxl').select( ['OWNER','OWNER_ROLE','ENTITELED','ENTITLED_ROLE',
                                                                          'MATNR','HUTYP','PMAT','GR_DATE','VFDAT','LGPLA',
                                                                          'SSCC','UNIT','QUAN','CAT','EXTNO','Batch'])
-
-rawData.SSCC = rawData.SSCC.astype('Int64')
 rownumber = 1
-serializedData = {}
-for rawDataRow in rawData.to_dict(orient='records'):
+serializedData = []
+for rawDataRow in rawData.to_dicts():
     if rawDataRow['SSCC'] != None:
         #HU
         newDataRowHU = {'POSTYPE':"1",
@@ -38,10 +36,10 @@ for rawDataRow in rawData.to_dict(orient='records'):
                         'ROW':rownumber,
                         'REFROW':"",
                         'G_WEIGHT':"",'N_WEIGHT':"",'UNIT_GW':"",'T_WEIGHT':"",'UNIT_TW':"",'G_VOLUME':"",'N_VOLUME':"",'UNIT_GV':"",'T_VOLUME':"",'UNIT_TV':"",'G_CAPA':"",'N_CAPA':"",'T_CAPA':"",'LENGTH':"",'WIDTH':"",'HEIGHT':"",'UNIT_LWH':"",'MAX_WEIGHT':"",'TOLW':"",'TARE_VAR':"",'MAX_VOLUME':"",'TOLV':"",'CLOSED_PACKAGE':"",'MAX_CAPA':"",'MAX_LENGTH':"",'MAX_WIDTH':"",'MAX_HEIGHT':"",'UNIT_MAX_LWH':"",'SERNR':"",'CWQUAN':"",'CWUNIT':"",'CWEXACT':"",'LOGPOS':"",'UII':"",'AMOUNT_LC':"",'DUMMY_ISU':"",'ZEUGN':""}
-        serializedData[rownumber] = newDataRowHU
+        serializedData.append(newDataRowHU)
         rownumber += 1
         #Item in HU
-        newDataRowHU = {'POSTYPE':"1",
+        newDataRowHU = {'POSTYPE':"4",
                         'MATNR':rawDataRow['MATNR'],
                         'OWNER':rawDataRow['OWNER'],
                         'OWNER_ROLE':rawDataRow['OWNER_ROLE'],
@@ -69,7 +67,7 @@ for rawDataRow in rawData.to_dict(orient='records'):
                         'ROW':rownumber,
                         'REFROW':newDataRowHU['ROW'],
                         'G_WEIGHT':"",'N_WEIGHT':"",'UNIT_GW':"",'T_WEIGHT':"",'UNIT_TW':"",'G_VOLUME':"",'N_VOLUME':"",'UNIT_GV':"",'T_VOLUME':"",'UNIT_TV':"",'G_CAPA':"",'N_CAPA':"",'T_CAPA':"",'LENGTH':"",'WIDTH':"",'HEIGHT':"",'UNIT_LWH':"",'MAX_WEIGHT':"",'TOLW':"",'TARE_VAR':"",'MAX_VOLUME':"",'TOLV':"",'CLOSED_PACKAGE':"",'MAX_CAPA':"",'MAX_LENGTH':"",'MAX_WIDTH':"",'MAX_HEIGHT':"",'UNIT_MAX_LWH':"",'SERNR':"",'CWQUAN':"",'CWUNIT':"",'CWEXACT':"",'LOGPOS':"",'UII':"",'AMOUNT_LC':"",'DUMMY_ISU':"",'ZEUGN':""}
-        serializedData[rownumber] = newDataRowHU
+        serializedData.append(newDataRowHU)
         rownumber += 1
     else:
         newDataRowHU = {'POSTYPE':"1",
@@ -100,11 +98,11 @@ for rawDataRow in rawData.to_dict(orient='records'):
                         'ROW':rownumber,
                         'REFROW':"",
                         'G_WEIGHT':"",'N_WEIGHT':"",'UNIT_GW':"",'T_WEIGHT':"",'UNIT_TW':"",'G_VOLUME':"",'N_VOLUME':"",'UNIT_GV':"",'T_VOLUME':"",'UNIT_TV':"",'G_CAPA':"",'N_CAPA':"",'T_CAPA':"",'LENGTH':"",'WIDTH':"",'HEIGHT':"",'UNIT_LWH':"",'MAX_WEIGHT':"",'TOLW':"",'TARE_VAR':"",'MAX_VOLUME':"",'TOLV':"",'CLOSED_PACKAGE':"",'MAX_CAPA':"",'MAX_LENGTH':"",'MAX_WIDTH':"",'MAX_HEIGHT':"",'UNIT_MAX_LWH':"",'SERNR':"",'CWQUAN':"",'CWUNIT':"",'CWEXACT':"",'LOGPOS':"",'UII':"",'AMOUNT_LC':"",'DUMMY_ISU':"",'ZEUGN':""}
-        serializedData[rownumber] = newDataRowHU
+        serializedData.append(newDataRowHU)
         rownumber += 1
-df = DataFrame.from_dict(serializedData, orient='index')
-df.HUIDENT = df.HUIDENT.astype('Int64')
-df.to_csv('stock_upload.csv', index=False)
+df = from_dicts(serializedData)
+print(df)
+df.write_csv('stock_upload.csv')
 
 
 
