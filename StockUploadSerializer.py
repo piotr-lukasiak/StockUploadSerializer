@@ -1,6 +1,6 @@
-from polars import DataFrame, read_excel, from_dicts
+from polars import DataFrame, read_excel, from_dicts, Config
 
-rawData = read_excel("MAPPING_TEMPLATE.xlsx",sheet_name='LX02_DATA',engine = 'openpyxl').select( ['OWNER','OWNER_ROLE','ENTITELED','ENTITLED_ROLE',
+rawData = read_excel("MAPPING_TEMPLATE.xlsx",sheet_name='LX02_DATA',engine = 'calamine').select( ['OWNER','OWNER_ROLE','ENTITELED','ENTITLED_ROLE',
                                                                          'MATNR','HUTYP','PMAT','GR_DATE','VFDAT','LGPLA',
                                                                          'SSCC','UNIT','QUAN','CAT','EXTNO','Batch'])
 rownumber = 1
@@ -101,7 +101,7 @@ for rawDataRow in rawData.to_dicts():
         serializedData.append(newDataRowHU)
         rownumber += 1
 df = from_dicts(serializedData)
-print(df)
+print(rawData['SSCC'])
 df.write_csv('stock_upload.csv')
 
 
